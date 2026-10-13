@@ -1,61 +1,22 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environment
-.venv/
+*.pyo
+*.pyd
 venv/
-ENV/
+.venv/
 env/
 
-# Environment Variables
+# Environment variables and secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-parkinsons_dashboard.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
+# Editors and operating system
 .DS_Store
-Thumbs.db
+.vscode/
 
-# Model files (if you want to keep them local)
-# Uncomment if you want to exclude large model files
-# tremor_model/*.pkl
-# voice_model/*.pkl
-# alcohol_model/*.pkl
-
-# Test files
-tests/
+# Logs and temporary files
+*.log
 .pytest_cache/
-.coverage
-htmlcov/
+.mypy_cache/

@@ -1,22 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parkinson's Disease Multi-Modal ML Screening Dashboard</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="dark-theme">
+
+
+    <div class="forest-particles" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
 
     <!-- TOP NAVIGATION BAR -->
     <header class="top-nav">
         <div class="nav-brand">
             <div class="brand-logo">🧠</div>
             <div class="brand-text">
-                <span class="brand-title">NeuroScreen<span class="brand-highlight">ML</span></span>
+                <span class="brand-title">NeuroCare<span class="brand-highlight">ML</span></span>
                 <span class="brand-subtitle">Integrated Parkinson's Clinical Decision-Support Pipeline</span>
             </div>
         </div>
@@ -47,7 +61,7 @@
         <div class="auth-card glass-panel">
             <div class="auth-header">
                 <div class="auth-icon">🏥</div>
-                <h2>Clinical ML Dashboard</h2>
+                <h2>Clinical ML Authentication</h2>
                 <p>Sign in to access integrated Parkinson's voice & behavioral analysis models</p>
             </div>
 
@@ -73,8 +87,10 @@
                 <div class="quick-demo-box">
                     <p class="quick-demo-title">⚡ Quick Demo Login:</p>
                     <div class="quick-demo-btns">
-                        <button type="button" class="btn btn-secondary btn-xs" id="demo-doctor-btn">👤 Login as Doctor</button>
-                        <button type="button" class="btn btn-secondary btn-xs" id="demo-patient-btn">👤 Login as Patient</button>
+                        <button type="button" class="btn btn-secondary btn-xs" id="demo-doctor-btn">👤 Login as
+                            Doctor</button>
+                        <button type="button" class="btn btn-secondary btn-xs" id="demo-patient-btn">👤 Login as
+                            Patient</button>
                     </div>
                 </div>
             </form>
@@ -113,19 +129,22 @@
 
     <!-- MAIN DASHBOARD CONTENT -->
     <main class="dashboard-layout" id="dashboard-screen" style="display: none;">
-        
+
         <!-- RESEARCH & CLINICAL DISCLAIMER BANNER -->
         <div class="disclaimer-banner">
             <span class="disclaimer-icon">⚠️</span>
             <div class="disclaimer-text">
-                <strong>Scientific Research & Decision-Support System</strong>: This ML pipeline integrates trained acoustic & behavioral models. It is designed for clinical screening evaluation and does <strong>NOT</strong> provide a definitive medical diagnosis.
+                <strong>Scientific Research & Decision-Support System</strong>: This ML pipeline integrates trained
+                acoustic & behavioral models. It is designed for clinical screening evaluation and does
+                <strong>NOT</strong> provide a definitive medical diagnosis.
             </div>
         </div>
 
         <!-- DOCTOR ALERT NOTIFICATION CENTER PANEL (VISIBLE TO DOCTOR ROLE) -->
         <section class="dashboard-section" id="doctor-notifications-section" style="display: none;">
             <div class="section-header">
-                <h3>🔔 Doctor Risk Alert Center <span class="badge badge-alert" id="unread-count-badge">0 New</span></h3>
+                <h3>🔔 Doctor Risk Alert Center <span class="badge badge-alert" id="unread-count-badge">0 New</span>
+                </h3>
                 <button class="btn btn-secondary btn-sm" id="refresh-notifs-btn">Refresh Alerts</button>
             </div>
             <div class="notifications-list" id="notifications-container">
@@ -134,10 +153,10 @@
         </section>
 
         <div class="grid-two-columns">
-            
+
             <!-- LEFT COLUMN: INPUTS & RECORDING -->
             <div class="column-left">
-                
+
                 <!-- PATIENT INFORMATION CARD -->
                 <section class="card glass-card">
                     <div class="card-header">
@@ -190,7 +209,9 @@
                     <!-- RECORD LIVE AUDIO MODE -->
                     <div class="audio-mode-panel active" id="mode-record-panel">
                         <div class="record-instructions">
-                            <p><strong>Instructions:</strong> Press Record, sit in a quiet room, and say <strong>"aaaaah"</strong> steadily for 5-7 seconds.</p>
+                            <p><strong>Instructions:</strong> Press Record, sit in a quiet room, and say
+                                <strong>"aaaaah"</strong> steadily for 5-7 seconds.
+                            </p>
                         </div>
 
                         <div class="recorder-widget">
@@ -211,6 +232,10 @@
                                 <button class="btn btn-danger" id="btn-stop-record" style="display: none;">
                                     ⏹ Stop Recording
                                 </button>
+                                <button type="button" class="btn btn-secondary" id="btn-delete-recording"
+                                    style="display: none;">
+                                    Delete Recording &amp; Record Again
+                                </button>
                             </div>
 
                             <div id="audio-preview-box" style="display: none;" class="audio-preview">
@@ -229,7 +254,7 @@
                             <input type="file" id="audio-file-input" accept="audio/*" style="display: none;">
                         </div>
                         <div id="selected-file-name" class="file-status">No file selected</div>
-                        
+
                         <div class="preset-sample-box">
                             <button type="button" class="btn btn-secondary btn-sm" id="btn-use-sample">
                                 🎵 Use Pre-recorded Sample WAV (my_voice.wav)
@@ -248,28 +273,36 @@
                     </div>
 
                     <div class="audio-input-tabs">
-                        <button type="button" class="tab-sub-btn active" id="subtab-tremor-segment">Benchmark Dataset Segments</button>
-                        <button type="button" class="tab-sub-btn" id="subtab-tremor-upload">Upload Kinematic CSV</button>
+                        <button type="button" class="tab-sub-btn active" id="subtab-tremor-segment">Benchmark Dataset
+                            Segments</button>
+                        <button type="button" class="tab-sub-btn" id="subtab-tremor-upload">Upload Kinematic
+                            CSV</button>
                     </div>
 
                     <!-- MODE A: BENCHMARK DATASET SEGMENT -->
                     <div class="audio-mode-panel active" id="mode-tremor-segment-panel">
                         <div class="record-instructions">
-                            <p><strong>Tri-Axial Inertial Sensors:</strong> Evaluates 250-sample time windows of Accelerometer (aX, aY, aZ), Gyroscope (gX, gY, gZ), and Magnetometer (mX) signals with time-blocked cross-validation.</p>
+                            <p><strong>Tri-Axial Inertial Sensors:</strong> Evaluates 250-sample time windows of
+                                Accelerometer (aX, aY, aZ), Gyroscope (gX, gY, gZ), and Magnetometer (mX) signals with
+                                time-blocked cross-validation.</p>
                         </div>
 
                         <div class="form-group" style="margin-bottom: 0.75rem;">
                             <label for="tremor-segment-input">Select Test Dataset Segment (1 – 111):</label>
                             <div style="display: flex; gap: 0.75rem; align-items: center;">
-                                <input type="number" id="tremor-segment-input" min="1" max="111" value="1" style="width: 100px;">
-                                <span class="file-status" id="tremor-segment-status" style="margin:0; text-align:left; font-size: 0.85rem; color: var(--accent-color);">
+                                <input type="number" id="tremor-segment-input" min="1" max="111" value="1"
+                                    style="width: 100px;">
+                                <span class="file-status" id="tremor-segment-status"
+                                    style="margin:0; text-align:left; font-size: 0.85rem; color: var(--accent-color);">
                                     Segment #1 (Rows 1–250, 9 analysis windows)
                                 </span>
                             </div>
                         </div>
 
                         <div class="preset-sample-box" style="margin-top: 0.5rem; text-align: left;">
-                            <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">⚡ Quick Preset Test Cases:</span>
+                            <span
+                                style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">⚡
+                                Quick Preset Test Cases:</span>
                             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                 <button type="button" class="btn btn-secondary btn-xs preset-segment-btn" data-seg="1">
                                     🔴 Preset #1 (Parkinson's Tremor)
@@ -295,7 +328,8 @@
                             <small>Expected columns: aX, aY, aZ, gX, gY, gZ, mX (Min 50 rows)</small>
                             <input type="file" id="tremor-file-input" accept=".csv" style="display: none;">
                         </div>
-                        <div id="selected-tremor-file-name" class="file-status">No CSV file selected (using benchmark segment)</div>
+                        <div id="selected-tremor-file-name" class="file-status">No CSV file selected (using benchmark
+                            segment)</div>
                     </div>
 
                     <div class="action-footer" style="margin-top: 1.25rem;">
@@ -309,7 +343,7 @@
 
             <!-- RIGHT COLUMN: ML RESULTS & HISTORICAL ANALYSES -->
             <div class="column-right">
-                
+
                 <!-- PIPELINE RESULTS CARD -->
                 <section class="card glass-card" id="results-card">
                     <div class="card-header">
@@ -319,17 +353,19 @@
 
                     <div class="results-placeholder" id="results-placeholder">
                         <div class="placeholder-icon">🔬</div>
-                        <p>Record or upload patient voice above and click <strong>"Run Integrated ML Pipeline"</strong> to execute both models.</p>
+                        <p>Record or upload patient voice above and click <strong>"Run Integrated ML Pipeline"</strong>
+                            to execute both models.</p>
                     </div>
 
                     <div class="results-content" id="results-content" style="display: none;">
-                        
+
                         <!-- HIGH RISK ALERT BANNER IF TRIGGERED -->
                         <div class="high-risk-alert" id="high-risk-banner" style="display: none;">
                             <span class="alert-icon">🔔</span>
                             <div>
                                 <strong>HIGH CLINICAL RISK DETECTED</strong>
-                                <p>Configured clinical alert threshold triggered (Voice Confidence ≥ 60% and Age ≥ 60). Doctor notification has been sent.</p>
+                                <p>Configured clinical alert threshold triggered (Voice Confidence ≥ 60% and Age ≥ 60).
+                                    Doctor notification has been sent.</p>
                             </div>
                         </div>
 
@@ -376,7 +412,8 @@
 
                             <div class="gauge-container">
                                 <div class="gauge-bar-wrapper">
-                                    <div class="gauge-bar-fill alcohol-fill" id="alcohol-gauge-fill" style="width: 0%;"></div>
+                                    <div class="gauge-bar-fill alcohol-fill" id="alcohol-gauge-fill" style="width: 0%;">
+                                    </div>
                                 </div>
                                 <div class="gauge-value" id="alcohol-prob-val">0.0%</div>
                             </div>
@@ -410,7 +447,8 @@
 
                             <div class="gauge-container">
                                 <div class="gauge-bar-wrapper">
-                                    <div class="gauge-bar-fill tremor-fill" id="tremor-gauge-fill" style="width: 0%;"></div>
+                                    <div class="gauge-bar-fill tremor-fill" id="tremor-gauge-fill" style="width: 0%;">
+                                    </div>
                                 </div>
                                 <div class="gauge-value" id="tremor-score-val">0.0%</div>
                             </div>
@@ -464,7 +502,12 @@
                                 </div>
                             </div>
                             <div class="scientific-note" style="margin-top: 0.75rem;">
-                                <strong>Clinical Value of Tri-Modal Integration:</strong> Speech acoustics capture cranial nerve vocal phonation control, kinematic inertial sensors capture peripheral limb tremor oscillations (3–8 Hz), and the demographic model benchmarks epidemiological risk. Rather than forcing an artificial mathematical combination, presenting all three distinct signals simultaneously provides multi-dimensional decision-support for clinician review.
+                                <strong>Clinical Value of Tri-Modal Integration:</strong> Speech acoustics capture
+                                cranial nerve vocal phonation control, kinematic inertial sensors capture peripheral
+                                limb tremor oscillations (3–8 Hz), and the demographic model benchmarks epidemiological
+                                risk. Rather than forcing an artificial mathematical combination, presenting all three
+                                distinct signals simultaneously provides multi-dimensional decision-support for
+                                clinician review.
                             </div>
                         </div>
                     </div>
@@ -529,6 +572,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>

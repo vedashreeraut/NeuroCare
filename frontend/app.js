@@ -4,6 +4,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    const API_BASE = 'http://127.0.0.1:8000';
+
     // Global State
     let authToken = localStorage.getItem('parkinsons_jwt_token') || null;
     let currentUser = null;
@@ -26,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userDisplayName = document.getElementById('user-display-name');
     const userRoleTag = document.getElementById('user-role-tag');
     const logoutBtn = document.getElementById('logout-btn');
-    
+
     // Auth Forms
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const subtabUpload = document.getElementById('subtab-upload');
     const modeRecordPanel = document.getElementById('mode-record-panel');
     const modeUploadPanel = document.getElementById('mode-upload-panel');
-    
+
     const btnStartRecord = document.getElementById('btn-start-record');
     const btnStopRecord = document.getElementById('btn-stop-record');
     const visualizerBox = document.getElementById('visualizer-box');
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsPlaceholder = document.getElementById('results-placeholder');
     const resultsContent = document.getElementById('results-content');
     const highRiskBanner = document.getElementById('high-risk-banner');
-    
+
     // Model 1: Voice
     const voiceClassBadge = document.getElementById('voice-class-badge');
     const voiceGaugeFill = document.getElementById('voice-gauge-fill');
@@ -125,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initApp() {
         if (authToken) {
             try {
-                const res = await fetch('/api/auth/me', {
+                const res = await fetch(`${API_BASE}/api/auth/me`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (res.ok) {
@@ -140,14 +142,47 @@ document.addEventListener('DOMContentLoaded', () => {
         showAuthScreen();
     }
 
+
     function showAuthScreen() {
+        // Clear the current authenticated session.
         authToken = null;
         currentUser = null;
         localStorage.removeItem('parkinsons_jwt_token');
-        authScreen.style.display = 'flex';
+
+        // Stop any active recording when logging out.
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+
+        clearInterval(recordTimerInterval);
+        recordTimerInterval = null;
+
+        // Close any open modal or loading overlay.
+        const detailModal = document.getElementById('detail-modal');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        if (detailModal) detailModal.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+        // Explicitly hide the entire dashboard and its navigation controls.
         dashboardScreen.style.display = 'none';
         navUserControls.style.display = 'none';
+
+        // Show the authentication screen.
+        authScreen.style.display = 'flex';
+
+        // Reset to the login tab.
+        tabLoginBtn.classList.add('active');
+        tabRegisterBtn.classList.remove('active');
+        loginForm.classList.add('active');
+        registerForm.classList.remove('active');
+        hideAuthError();
+
+        // Return the viewport to the top.
+        window.scrollTo({ top: 0, behavior: 'instant' });
     }
+
 
     function setupDashboardForUser() {
         authScreen.style.display = 'none';
@@ -167,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         loadHistory();
-        
+
         // Animate dashboard entrance
         dashboardScreen.style.opacity = '0';
         dashboardScreen.style.transform = 'translateY(20px)';
@@ -214,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('login-password').value;
 
         try {
-            const res = await fetch('/api/auth/login', {
+            const res = await fetch(`${API_BASE}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -240,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const role = document.getElementById('reg-role').value;
 
         try {
-            const res = await fetch('/api/auth/register', {
+            const res = await fetch(`${API_BASE}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ full_name, email, password, role })
@@ -291,10 +326,19 @@ document.addEventListener('DOMContentLoaded', () => {
         modeRecordPanel.classList.remove('active');
     });
 
+
+    const btnDeleteRecording = document.getElementById('btn-delete-recording');
+
     btnStartRecord.addEventListener('click', async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Clear any previous recording before starting again.
+            recordedAudioBlob = null;
             audioChunks = [];
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
             mediaRecorder = new MediaRecorder(stream);
 
             mediaRecorder.ondataavailable = (event) => {
@@ -304,33 +348,129 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             mediaRecorder.onstop = () => {
-                recordedAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                if (audioChunks.length === 0) {
+                    stream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
+                recordedAudioBlob = new Blob(audioChunks, {
+                    type: mediaRecorder.mimeType || 'audio/webm'
+                });
+
                 const audioUrl = URL.createObjectURL(recordedAudioBlob);
                 recordedAudioElement.src = audioUrl;
                 audioPreviewBox.style.display = 'block';
+
+                if (btnDeleteRecording) {
+                    btnDeleteRecording.style.display = 'inline-flex';
+                }
+
                 selectedUploadFile = null;
                 useSampleAudioFlag = false;
+
+                stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorder.start();
+
             btnStartRecord.style.display = 'none';
             btnStopRecord.style.display = 'inline-flex';
+
+            if (btnDeleteRecording) {
+                btnDeleteRecording.style.display = 'none';
+            }
+
             visualizerBox.classList.add('recording');
 
             recordSeconds = 0;
             recordTimer.textContent = '00:00';
+
+            clearInterval(recordTimerInterval);
+
             recordTimerInterval = setInterval(() => {
                 recordSeconds++;
-                const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
-                const secs = String(recordSeconds % 60).padStart(2, '0');
+
+                const mins = String(
+                    Math.floor(recordSeconds / 60)
+                ).padStart(2, '0');
+
+                const secs = String(
+                    recordSeconds % 60
+                ).padStart(2, '0');
+
                 recordTimer.textContent = `${mins}:${secs}`;
             }, 1000);
 
         } catch (err) {
-            alert("Microphone permission denied or unsupported device. Please use File Upload instead.");
-            console.error("Microphone access error:", err);
+            alert(
+                'Microphone permission denied or unsupported device. Please use File Upload instead.'
+            );
+            console.error('Microphone access error:', err);
         }
     });
+
+    btnStopRecord.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+
+        clearInterval(recordTimerInterval);
+        recordTimerInterval = null;
+
+        btnStartRecord.style.display = 'inline-flex';
+        btnStopRecord.style.display = 'none';
+
+        visualizerBox.classList.remove('recording');
+    });
+
+    if (btnDeleteRecording) {
+        btnDeleteRecording.addEventListener('click', () => {
+            // Stop playback and release the old audio URL.
+            if (recordedAudioElement) {
+                recordedAudioElement.pause();
+
+                const oldUrl = recordedAudioElement.src;
+
+                recordedAudioElement.removeAttribute('src');
+                recordedAudioElement.load();
+
+                if (oldUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(oldUrl);
+                }
+            }
+
+            // Clear the recording from application state.
+            recordedAudioBlob = null;
+            audioChunks = [];
+            selectedUploadFile = null;
+            useSampleAudioFlag = false;
+
+            // Clear any uploaded file.
+            if (audioFileInput) {
+                audioFileInput.value = '';
+            }
+
+            if (selectedFileName) {
+                selectedFileName.textContent = 'No file selected';
+            }
+
+            // Hide the preview and delete button.
+            audioPreviewBox.style.display = 'none';
+            btnDeleteRecording.style.display = 'none';
+
+            // Reset the timer and recording controls.
+            recordSeconds = 0;
+            recordTimer.textContent = '00:00';
+
+            btnStartRecord.style.display = 'inline-flex';
+            btnStartRecord.disabled = false;
+            btnStopRecord.style.display = 'none';
+
+            visualizerBox.classList.remove('recording');
+        });
+    }
+
+
 
     btnStopRecord.addEventListener('click', () => {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -515,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (spinnerText) spinnerText.textContent = "Executing Voice, Alcohol, and Tremor ML Models...";
 
         try {
-            const res = await fetch('/api/analysis/predict', {
+            const res = await fetch(`${API_BASE}/api/analysis/predict`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${authToken}` },
                 body: formData
@@ -639,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadDoctorNotifications() {
         try {
-            const res = await fetch('/api/notifications', {
+            const res = await fetch(`${API_BASE}/api/notifications`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             if (!res.ok) return;
@@ -672,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.mark-read-btn').forEach(b => {
                 b.addEventListener('click', async (e) => {
                     const id = e.target.dataset.id;
-                    await fetch(`/api/notifications/${id}/read`, {
+                    await fetch(`${API_BASE}/api/notifications/${id}/read`, {
                         method: 'PATCH',
                         headers: { 'Authorization': `Bearer ${authToken}` }
                     });
@@ -695,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadHistory() {
         try {
-            const res = await fetch('/api/analysis/history', {
+            const res = await fetch(`${API_BASE}/api/analysis/history`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             if (!res.ok) return;
@@ -736,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function openAnalysisDetailModal(analysisId) {
         try {
-            const res = await fetch(`/api/analysis/history/${analysisId}`, {
+            const res = await fetch(`${API_BASE}/api/analysis/history/${analysisId}`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             if (!res.ok) throw new Error("Could not fetch detail");
